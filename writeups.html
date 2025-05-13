@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Write-ups | Jorge Bravo Blog</title>
+  <meta name="description" content="Colección de write-ups de HackTheBox, TryHackMe y otros desafíos de ciberseguridad">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:title" content="Write-ups | Jorge Bravo Blog">
+  <meta property="og:description" content="Colección de write-ups de HackTheBox, TryHackMe y otros desafíos de ciberseguridad">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://jorgeb02.github.io/porfolio-para-github/writeups.html">
+  <meta property="og:image" content="img/default-og.png">
+  
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="logo">
+          <a href="index.html" class="logo-link">
+            <h1 class="site-title">Jorge Bravo</h1>
+            <span class="site-description">Ciberseguridad y más</span>
+          </a>
+        </div>
+        
+        <nav class="main-nav">
+          <button class="menu-toggle" aria-expanded="false" aria-controls="navigation">
+            <span class="sr-only">Menú</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          
+          <ul id="navigation" class="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="writeups.html" class="nav-link active">Write-ups</a></li>
+            <li class="nav-item"><a href="blog.html" class="nav-link">Blog</a></li>
+            <li class="nav-item"><a href="about.html" class="nav-link">Sobre mí</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="container">
+    <div class="writeups-archive">
+      <header class="archive-header">
+        <h1 class="archive-title">Write-ups</h1>
+        <p class="archive-description">Soluciones detalladas de máquinas de HackTheBox, TryHackMe y otros desafíos de ciberseguridad</p>
+      </header>
+      
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="provider-filter" class="filter-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            Proveedor:
+          </label>
+          <select id="provider-filter" class="filter-select">
+            <option value="all" selected>Todos</option>
+            <option value="hackthebox">HackTheBox</option>
+            <option value="tryhackme">TryHackMe</option>
+            <option value="vulnhub">VulnHub</option>
+            <option value="hackthissite">HackThisSite</option>
+            <option value="rootme">Root-Me</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="difficulty-filter" class="filter-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            Dificultad:
+          </label>
+          <select id="difficulty-filter" class="filter-select">
+            <option value="all" selected>Todas</option>
+            <option value="easy">Fácil</option>
+            <option value="medium">Media</option>
+            <option value="hard">Difícil</option>
+            <option value="insane">Insane</option>
+          </select>
+        </div>
+        
+        <div class="filter-group filter-search">
+          <input type="text" id="search-input" class="search-input" placeholder="Buscar write-ups..." aria-label="Buscar write-ups">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary);">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="writeups-grid" id="all-writeups">
+        <!-- El contenido se cargará desde JavaScript -->
+      </div>
+      
+      <div id="no-results" class="no-results" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; color: var(--color-text-secondary);">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+        <p>No se encontraron write-ups con los filtros seleccionados.</p>
+        <button id="reset-filters" class="btn btn-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          Restablecer filtros
+        </button>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-info">
+          <p class="copyright">&copy; <span id="current-year">2025</span> Jorge Bravo González. Todos los derechos reservados.</p>
+        </div>
+        
+        <div class="footer-links">
+          <ul class="social-links">
+            <li><a href="https://www.linkedin.com/in/jorge-bravo-gonz%C3%A1lez/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // Actualizar año actual en el copyright
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+    // Cargar todos los write-ups
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAllContent('writeups', 'all-writeups');
+      
+      // Configurar filtrado
+      const providerFilter = document.getElementById('provider-filter');
+      const difficultyFilter = document.getElementById('difficulty-filter');
+      const searchInput = document.getElementById('search-input');
+      const resetFiltersBtn = document.getElementById('reset-filters');
+      
+      // Función para aplicar filtros
+      function applyFilters() {
+        const providerValue = providerFilter.value;
+        const difficultyValue = difficultyFilter.value;
+        const searchValue = searchInput.value.toLowerCase();
+        
+        filterContent('writeups', 'all-writeups', {
+          provider: providerValue !== 'all' ? providerValue : null,
+          difficulty: difficultyValue !== 'all' ? difficultyValue : null,
+          search: searchValue
+        });
+      }
+      
+      // Eventos para los filtros
+      providerFilter.addEventListener('change', applyFilters);
+      difficultyFilter.addEventListener('change', applyFilters);
+      searchInput.addEventListener('input', applyFilters);
+      
+      // Botón para restablecer filtros
+      resetFiltersBtn.addEventListener('click', () => {
+        providerFilter.value = 'all';
+        difficultyFilter.value = 'all';
+        searchInput.value = '';
+        applyFilters();
+      });
+    });
+  </script>
+</body>
+</html>
